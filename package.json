@@ -1,0 +1,27 @@
+{
+  "name": "phantom-user-master-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha tests/user.js"
+  },
+  "author": "monisha mohan (omo2kor)",
+  "license": "ISC",
+  "dependencies": {
+    "amazon-cognito-identity-js": "^3.1.2",
+    "atob": "^2.1.2",
+    "aws-sdk": "^2.587.0",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "moment": "^2.24.0",
+    "mongodb": "^3.3.2",
+    "node-fetch": "^2.6.0"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^6.2.2",
+    "request": "^2.88.0"
+  }
+}

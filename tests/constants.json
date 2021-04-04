@@ -1,0 +1,20 @@
+[
+    {   
+        "test": "Health Check",
+        "host": "test",
+        "expect": {
+            "status": "success",
+            "code": 200,
+            "message": "OK"
+        }
+    },
+    {   
+        "test": "Health Check 2",
+        "host": "test",
+        "expect": {
+            "status": "success",
+            "code": 200,
+            "message": "OK"
+        }
+    }
+]
