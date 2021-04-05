@@ -38,6 +38,16 @@ module.exports = {
         return definitions;
     },
 
+    generatePassword: () => {
+        var length = 6,
+            charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_-+=",
+            retVal = "";
+        for (var i = 0, n = charset.length; i < length; ++i) {
+            retVal += charset.charAt(Math.floor(Math.random() * n));
+        }
+        return retVal;
+    },
+
     /*R-Function to delete an user and log this activity to db
     *@params nill
     */
@@ -86,44 +96,15 @@ module.exports = {
     */
     register: async (req, res) => {
         const formData = req.body;
+        formData.password = `${module.exports.generatePassword()}hH1@`;
+        formData.role = 'admin';
         const { Pool } = await module.exports.defaults();
-        const group = ['global-executive', 'country-executive', 'city-executive', 'store-incharge', 'operator', 'admin'];
+        const group = ['admin'];
         var notFoundAttribs = [];
-        var general;
         var custom;
-        var must = ['picture', 'profile', 'locale', 'birthdate', 'address'];
+        var must = ['email'];
         if (group.includes(formData.role)) {                            // matches the role from request to existing roles
-            switch (formData.role) {                                                    // switch case to assign general and custom attribs based on user role
-                case 'global-executive': general = ['email', 'phone_number', 'name'];
-                    custom = ['company_name', 'parent_id'];
-                    break;
-                case 'country-executive': general = ['email', 'phone_number', 'name'];
-                    custom = ['company_name', 'tenant_id', 'country', 'parent_id'];
-                    break;
-                case 'city-executive': general = ['email', 'phone_number', 'name'];
-                    custom = ['company_name', 'tenant_id', 'city', 'country', 'parent_id'];
-                    break;
-                case 'store-incharge': general = ['email', 'phone_number', 'name'];
-                    custom = ['company_name', 'tenant_id', 'city', 'store_name', 'country', 'parent_id'];
-                    break;
-                case 'operator': general = ['email', 'phone_number', 'name'];
-                    custom = ['company_name', 'tenant_id', 'city', 'country', 'store_name', 'parent_id'];
-                    break;
-                case 'admin': general = ['email', 'phone_number', 'name'];
-                    custom = ['company_name', 'tenant_id', 'parent_id'];
-                    break;
-            }
             const attributeList = [];
-            general.map(g => {
-                if (formData[g] != undefined) {
-                    attributeList.push(new AmazonCognitoIdentity.CognitoUserAttribute({
-                        Name: g,
-                        Value: formData[g].toUpperCase()
-                    }));
-                }
-                else
-                    notFoundAttribs.push(g);   //push the required attribs not found for the role to notFoundAttribs to throw error message at the end
-            });
             must.map(m => {
                 if (formData[m] != undefined) {
                     attributeList.push(new AmazonCognitoIdentity.CognitoUserAttribute({
@@ -133,24 +114,16 @@ module.exports = {
                 }
                 // notFoundAttribs.push(m);
             });
-            custom.map(c => {
-                if (formData[c] != undefined) {
-                    attributeList.push(new AmazonCognitoIdentity.CognitoUserAttribute({
-                        Name: `custom:${c}`,
-                        Value: formData[c].toUpperCase()
-                    }));
-                }
-                else
-                    notFoundAttribs.push(c);
-            });
             if (validEmail.email(formData.email) && notFoundAttribs.length == 0) {
                 Pool.signUp(formData.email.toUpperCase(), formData.password, attributeList, null, (err, result) => {
                     if (err) {
                         res.status(500).send({ message: err.message });
                         return;
+                    } else {
+                        cognitoUser = result.user;
+                        res.send({ message: "User Added" });
+                        // module.exports.addUserToGroup(req, res);
                     }
-                    cognitoUser = result.user;
-                    module.exports.addUserToGroup(req, res);
                 });
             }
             else {
@@ -178,7 +151,7 @@ module.exports = {
         var params = {
             GroupName: data.role, /* required */
             UserPoolId: Pool.getUserPoolId(), /* required */
-            Username: data.userId.toUpperCase() /* required */
+            Username: data.email.split('@')[0].toUpperCase() /* required */
         };
         const CognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider();
         CognitoIdentityServiceProvider.adminAddUserToGroup(params, (err, result) => {
@@ -376,7 +349,7 @@ module.exports = {
         const { Pool } = await module.exports.defaults();
         var params = {
             GroupName: 'Test',
-            UserPoolId: Pool.getUserPoolId()
+            UserPoolId: config.userPoolId
         };
         const CognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider();
         CognitoIdentityServiceProvider.createGroup(params, async function (err, data) {

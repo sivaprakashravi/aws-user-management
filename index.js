@@ -79,7 +79,7 @@ router.post('/user/updatePassword', ctrlUser.inputVerificationCode);
 // /* Route to post user group
 // *@params nill
 // */
-// router.post('/user/group', ctrlUser.createGroup);
+router.post('/user/group', ctrlUser.createGroup);
 
 /* Route to get user list
 *@params nill
