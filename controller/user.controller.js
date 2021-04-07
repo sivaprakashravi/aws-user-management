@@ -96,7 +96,9 @@ module.exports = {
     */
     register: async (req, res) => {
         const formData = req.body;
-        formData.password = `${module.exports.generatePassword()}hH1@`;
+        if(formData && !formData.password) {
+            formData.password = 'Horizon@12!'; // `${module.exports.generatePassword()}hH1@`;
+        }
         formData.role = 'admin';
         const { Pool } = await module.exports.defaults();
         const group = ['admin'];
@@ -286,6 +288,19 @@ module.exports = {
         const verificationCode = body.verificationCode;
         const { cognitoUser } = await module.exports.defaults(Username);
         cognitoUser.confirmRegistration(verificationCode, true, (err, result) => {
+            if (err) {
+                res.status(401).send(err);
+            } else {
+                res.send(new success(result));
+            }
+        });
+    },
+
+    newVerificationCode: async (req, res) => {
+        const body = req.body;
+        const Username = body.email;
+        const { cognitoUser } = await module.exports.defaults(Username);
+        cognitoUser.resendConfirmationCode((err, result) => {
             if (err) {
                 res.status(401).send(err);
             } else {

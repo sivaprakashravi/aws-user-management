@@ -61,6 +61,8 @@ router.post('/user/session', ctrlUser.session);
 */
 router.post('/user/confirm', ctrlUser.confirm);
 
+router.post('/user/newVerificationCode', ctrlUser.newVerificationCode);
+
  /* Route to change password
  *@params nill
  */
